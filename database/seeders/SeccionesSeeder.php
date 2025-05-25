@@ -54,6 +54,30 @@ class SeccionesSeeder extends Seeder
                 'created_at' => Carbon::parse('2025-05-02 18:38:17'),
                 'updated_at' => Carbon::parse('2025-05-02 18:38:17'),
             ],
+            [
+                'id' => 11,
+                'titulo' => 'Inventarios',
+                'icono' => 'fas fa-box',
+                'accion_usuario' => 'admin',
+                'created_at' => Carbon::parse('2025-05-08 06:07:07'),
+                'updated_at' => Carbon::parse('2025-05-08 06:07:07'),
+            ],
+            [
+                'id' => 12,
+                'titulo' => 'Gestión de Eventos',
+                'icono' => 'fas fa-calendar-alt',
+                'accion_usuario' => 'admin',
+                'created_at' => Carbon::parse('2025-05-08 07:18:53'),
+                'updated_at' => Carbon::parse('2025-05-08 07:18:53'),
+            ],
+            [
+                'id' => 13,
+                'titulo' => 'administracion imagenes',
+                'icono' => 'fas fa-images',
+                'accion_usuario' => 'admin',
+                'created_at' => Carbon::parse('2025-05-13 07:11:13'),
+                'updated_at' => Carbon::parse('2025-05-13 07:11:13'),
+            ],
         ]);
     }
 }

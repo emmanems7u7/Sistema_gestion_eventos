@@ -13,7 +13,7 @@ class CatalogoSeeder extends Seeder
         foreach (range(1, 10) as $categoriaId) {
 
             Catalogo::create([
-                'categoria_id' => rand(1, 4),
+                'categoria_id' => rand(1, 2),
                 'catalogo_parent' => null,
                 'catalogo_codigo' => 'C-' . str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT),
                 'catalogo_descripcion' => 'Descripción del catálogo ' . $categoriaId,

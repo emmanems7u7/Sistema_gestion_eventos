@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
         for ($i = 6; $i <= 30; $i++) {
             User::create([
                 'name' => 'usuario' . $i,
-                'email' => 'diegoc9716@gmail.com',
+                'email' => 'usuario' . $i . '@example.com',
                 'password' => Hash::make('password' . $i),
                 'usuario_fecha_ultimo_acceso' => Carbon::now()->subDays(rand(1, 30)),
                 'usuario_fecha_ultimo_password' => Carbon::now()->subDays(rand(10, 60)),

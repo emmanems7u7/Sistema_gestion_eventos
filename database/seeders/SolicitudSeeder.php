@@ -38,10 +38,13 @@ class SolicitudSeeder extends Seeder
         ];
 
         foreach ($eventos as $evento) {
+            $fecha = Carbon::now()->addDays(rand(1, 60))->setTime(rand(10, 20), rand(0, 59));
             Solicitud::create([
                 'titulo' => $evento,
                 'descripcion' => $evento,
-                'fecha' => Carbon::now()->addDays(rand(1, 60))->setTime(rand(10, 20), rand(0, 59)),
+                'fecha' => $fecha->toDateString(),
+                'hora_inicio' => $fecha->format('H:i'),
+                'hora_fin' => $fecha->copy()->addHours(2)->format('H:i'),
                 'ubicacion' => 'Salón ' . Str::random(5),
                 'geolocalizacion' => '-16.' . rand(4900, 5100) . ',-68.' . rand(1400, 1600),
                 'estado' => rand(0, 1),
