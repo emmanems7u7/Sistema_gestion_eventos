@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NotificarUsuarios;
 use App\Models\Cliente;
 use App\Models\Servicio;
 use App\Models\ServicioSolicitud;
@@ -19,6 +20,9 @@ use App\Models\User;
 use App\Models\SolicitudUsuario;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use App\Mail\NotificarAprobacionAutomaticaUsuarios;
+use App\Mail\NotificarAprobacionManual;
+use App\Mail\NotificacionNuevaSolicitudPendiente;
+use App\Mail\notificarCliente;
 use Illuminate\Support\Facades\Mail;
 use App\Models\ConfCorreo;
 class SolicitudController extends Controller
@@ -39,7 +43,7 @@ class SolicitudController extends Controller
             $query->where('estado_aprobacion', $request->estado_aprobacion);
         }
 
-        $solicitudes = $query->orderBy('fecha', 'asc')->paginate(10);
+        $solicitudes = $query->orderBy('created_at', 'desc')->paginate(10);
         return view('solicitudes.index', compact('solicitudes', 'breadcrumb'));
     }
 
@@ -57,6 +61,18 @@ class SolicitudController extends Controller
         return view('solicitudes.create', compact('breadcrumb', 'servicios'));
     }
 
+    public function crear_solicitud()
+    {
+        $breadcrumb = [
+            ['name' => 'Inicio', 'url' => route('home')],
+            ['name' => 'Solicitudes', 'url' => route('solicitudes.index')],
+            ['name' => 'Crear', 'url' => route('solicitudes.create')],
+
+        ];
+        $servicios = Servicio::all();
+
+        return view('solicitudes.solicitud_cliente', compact('breadcrumb', 'servicios'));
+    }
     // Guardar la solicitud en la base de datos
     public function store(Request $request)
     {
@@ -125,11 +141,14 @@ class SolicitudController extends Controller
             ]);
         }
         $data = $this->validar_servicios($solicitud);
+
         $fechaActual = Carbon::now()->startOfDay()->toDateString();
         $horaActual = Carbon::now()->format('H:i');
         $admins = User::role('admin')->get();
         if ($data['status'] == 1) {
-            $this->aprobar($solicitud, 2);
+            $aprobado = 1;
+            $this->aprobar($solicitud, 2, $aprobado);
+
             $seguimiento = SeguimientoSolicitud::create([
                 'solicitud_id' => $solicitud->id,
                 'mensaje' => "La solicitud fue aprobada automaticamente en fecha" . $fechaActual . " a horas " . $horaActual . " se informó al cliente mediante correo",
@@ -150,7 +169,104 @@ class SolicitudController extends Controller
 
         return redirect()->route('eventos.index')->with('success', 'Solicitud aprobada automaticamente con éxito');
     }
+    public function store_cliente(Request $request)
+    {
 
+        $conf = ConfCorreo::first();
+
+        if ($conf) {
+            config([
+                'mail.mailers.smtp.host' => $conf->conf_smtp_host,
+                'mail.mailers.smtp.port' => $conf->conf_smtp_port,
+                'mail.mailers.smtp.username' => $conf->conf_smtp_user,
+                'mail.mailers.smtp.password' => $conf->conf_smtp_pass,
+                'mail.mailers.smtp.encryption' => $conf->conf_protocol,
+                'mail.default' => 'smtp',
+            ]);
+        }
+
+        //  dd($request);
+        $validated = $request->validate([
+            'titulo' => 'required|string|max:255',
+            'descripcion' => 'nullable|string',
+            'fecha' => 'required|date',
+            'hora_inicio' => 'required|date_format:H:i|before:hora_fin',
+            'hora_fin' => 'required|date_format:H:i|after:hora_inicio',
+            'ubicacion' => 'nullable|string|max:255',
+            'geolocalizacion' => ['nullable', 'string', 'max:255', 'not_in:undefined'],
+            //datos del cliente
+            'nombre' => 'required|string|max:255',
+            'ape_pat' => 'required|string|max:255',
+            'ape_mat' => 'required|string|max:255',
+            'email' => 'required|email|unique:clientes,email',
+            'telefono' => 'nullable|string|max:20',
+
+        ]);
+
+        $serviciosSeleccionados = json_decode($request->input('servicios_seleccionados'), true);
+
+        $solicitud = Solicitud::create([
+            'titulo' => $validated['titulo'],
+            'descripcion' => $validated['descripcion'] ?? null,
+            'fecha' => $validated['fecha'],
+            'hora_inicio' => $validated['hora_inicio'],
+            'hora_fin' => $validated['hora_fin'],
+            'ubicacion' => $validated['ubicacion'] ?? null,
+            'geolocalizacion' => $validated['geolocalizacion'] ?? null,
+            'estado' => 1,
+            'estado_aprobacion' => 1
+        ]);
+
+        $cliente = Cliente::create([
+            'nombre' => $request->input('nombre'),
+            'ape_pat' => $request->input('ape_pat'),
+            'ape_mat' => $request->input('ape_mat'),
+            'email' => $request->input('email'),
+            'telefono' => $request->input('telefono'),
+            'solicitud_id' => $solicitud->id,
+        ]);
+
+        foreach ($serviciosSeleccionados as $servicioId => $planId) {
+
+            ServicioSolicitud::create([
+                'solicitud_id' => $solicitud->id,
+                'servicio_id' => $servicioId,
+                'tipo_servicio_id' => $planId,
+            ]);
+        }
+        $data = $this->validar_servicios($solicitud);
+
+        $fechaActual = Carbon::now()->startOfDay()->toDateString();
+        $horaActual = Carbon::now()->format('H:i');
+        $admins = User::role('admin')->get();
+        if ($data['status'] == 1) {
+            $aprobado = 1;
+            $this->aprobar($solicitud, 2, $aprobado);
+
+            $seguimiento = SeguimientoSolicitud::create([
+                'solicitud_id' => $solicitud->id,
+                'mensaje' => "La solicitud fue aprobada automaticamente en fecha" . $fechaActual . " a horas " . $horaActual . " se informó al cliente mediante correo",
+            ]);
+
+            foreach ($admins as $admin) {
+                Mail::to($admin->email)->send(new NotificarAprobacionAutomaticaUsuarios($solicitud));
+            }
+
+        } else {
+            $seguimiento = SeguimientoSolicitud::create([
+                'solicitud_id' => $solicitud->id,
+                'mensaje' => $data['mensaje'],
+            ]);
+
+            foreach ($admins as $admin) {
+                Mail::to($admin->email)->send(new NotificacionNuevaSolicitudPendiente($solicitud));
+            }
+            return redirect()->back()->with('success', 'La solicitud creada exitosamente');
+
+        }
+
+        return redirect()->back()->with('success', 'Solicitud aprobada automaticamente con éxito,revise su bandeja de mensajes de email');
+    }
     // Mostrar los detalles de una solicitud
     public function show(Solicitud $solicitud)
     {
@@ -312,8 +428,11 @@ class SolicitudController extends Controller
         return view('solicitudes.edit', compact('cliente', 'solicitud', 'breadcrumb', 'servicios'));
     }
 
-    public function aprobar(Solicitud $solicitud, $tipo = 3)
+    public function aprobar(Solicitud $solicitud, $tipo = 3, $aprobado = 0)
     {
+        if ($solicitud->estado_aprobacion != 1) {
+            return redirect()->back()->with('error', 'La solicitud ya fue aprobada');
+        }
         $tipo_servicios = ServicioSolicitud::where('solicitud_id', $solicitud->id)->get();
         $data = $this->validar_servicios($solicitud);
 
@@ -330,6 +449,9 @@ class SolicitudController extends Controller
                 'estado' => 1,
                 'estado_aprobacion' => $tipo
             ]);
+            $cliente = Cliente::where('solicitud_id', $solicitud->id)->first();
+            $cliente->evento_id = $evento->id;
+            $cliente->save();
 
             foreach ($tipo_servicios as $plan) {
 
@@ -343,7 +465,7 @@ class SolicitudController extends Controller
                 $role = Role::find($servicio->role_id);
                 $personal = $role ? User::role($role->name)->get() : collect();
 
-                $tipo_servicio = Tipo_Servicio::find($plan->tipo_servicio_id); // ✅ Aquí está el modelo correcto
+                $tipo_servicio = Tipo_Servicio::find($plan->tipo_servicio_id);
 
                 // Filtrar personal disponible en base a la fecha y horas de la solicitud
                 $personal_disponible = $personal->filter(function ($usuario) use ($solicitud) {
@@ -364,11 +486,35 @@ class SolicitudController extends Controller
                         'hora_inicio' => $solicitud->hora_inicio,
                         'hora_fin' => $solicitud->hora_fin,
                     ]);
+
+                    $usuario = User::find($usuario->id);
+                    Mail::to($usuario->email)->send(new NotificarUsuarios($evento));
+
                 }
+
             }
             $solicitud->estado_aprobacion = $tipo;
             $solicitud->save();
 
+            if ($aprobado == 0) {
+
+                $fechaActual = Carbon::now()->startOfDay()->toDateString();
+                $horaActual = Carbon::now()->format('H:i');
+                $admins = User::role('admin')->get();
+
+                $seguimiento = SeguimientoSolicitud::create([
+                    'solicitud_id' => $solicitud->id,
+                    'mensaje' => "La solicitud fue aprobada de forma manual en fecha" . $fechaActual . " a horas " . $horaActual . " se informó al cliente mediante correo",
+                ]);
+
+                $cliente = Cliente::where('solicitud_id', $solicitud->id)->first();
+                Mail::to($cliente->email)->send(new notificarCliente($evento));
+
+                foreach ($admins as $admin) {
+                    Mail::to($admin->email)->send(new NotificarAprobacionManual($solicitud));
+                }
+
+            }
         } else {
 
             return redirect()->back()->with('error', 'La solicitud no puede ser aprobada, ya que no hay suficiente personal o equipo disponible para el servicio solicitado. <br> ' . $data['mensaje']);
@@ -518,6 +664,60 @@ class SolicitudController extends Controller
         $solicitud->delete();
 
         return response()->json($response);
+    }
+
+
+    function verifica_precios(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'fecha' => 'required|date',
+                'hora_inicio' => 'required|date_format:H:i|before:hora_fin',
+                'hora_fin' => 'required|date_format:H:i|after:hora_inicio',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw new HttpResponseException(response()->json([
+                'status' => 3,
+                'errors' => $e->errors()
+            ], 422));
+        }
+
+        $serviciosSeleccionados = json_decode($request->input('servicios_seleccionados'), true);
+
+        $solicitud = Solicitud::create([
+            'titulo' => 'temporal',
+            'descripcion' => 'temporal',
+            'fecha' => $validated['fecha'],
+            'hora_inicio' => $validated['hora_inicio'],
+            'hora_fin' => $validated['hora_fin'],
+            'ubicacion' => 'temporal',
+            'geolocalizacion' => '0,0',
+            'estado' => 1,
+            'estado_aprobacion' => 1
+        ]);
+
+
+        foreach ($serviciosSeleccionados as $servicioId => $planId) {
+
+            ServicioSolicitud::create([
+                'solicitud_id' => $solicitud->id,
+                'servicio_id' => $servicioId,
+                'tipo_servicio_id' => $planId,
+            ]);
+        }
+
+
+
+        $total = $this->calcularTotal($solicitud);
+
+
+        $servicios_temp = ServicioSolicitud::where('solicitud_id', $solicitud->id)->get();
+        $servicios_temp->each(function ($servicio) {
+            $servicio->delete();
+        });
+        $solicitud->delete();
+
+        return response()->json(['status' => 1, 'total' => $total]);
     }
     function detalle_solicitud(Solicitud $solicitud)
     {

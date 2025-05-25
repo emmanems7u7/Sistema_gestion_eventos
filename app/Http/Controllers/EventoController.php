@@ -3,8 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Evento;
+use App\Models\Cliente;
+use App\Models\EventoUsuario;
+use App\Models\Servicio;
+use App\Models\ServicioEvento;
+use App\Models\Tipo_Servicio;
 use Illuminate\Http\Request;
-
+use Carbon\Carbon;
+use App\Models\User;
+use PDF;
+use App\Mail\notificarCliente;
+use App\Models\Solicitud;
+use Illuminate\Support\Facades\Mail;
 class EventoController extends Controller
 {
     // Mostrar el listado de solicitudess
@@ -23,7 +33,7 @@ class EventoController extends Controller
             $query->where('estado_aprobacion', $request->estado_aprobacion);
         }
 
-        $eventos = $query->orderBy('fecha', 'asc')->paginate(10);
+        $eventos = $query->orderBy('created_at', 'desc')->paginate(10);
         return view('eventos.index', compact('eventos', 'breadcrumb'));
     }
 
@@ -98,9 +108,67 @@ class EventoController extends Controller
     // Mostrar los detalles de una solicitud
     public function show(Evento $evento)
     {
-        return view('eventos.show', compact('evento'));
-    }
+        $breadcrumb = [
+            ['name' => 'Inicio', 'url' => route('home')],
+            ['name' => 'Eventos', 'url' => route('eventos.index')],
+            ['name' => 'Detalles', 'url' => route('eventos.show', $evento)],
 
+        ];
+
+        $cliente = Cliente::where('evento_id', $evento->id)->first();
+
+        $tipo_servicios = ServicioEvento::where('evento_id', $evento->id)->get()->map(function ($item) {
+            return [
+                'servicio_id' => $item->servicio_id,
+                'nombre_servicio' => Servicio::find($item->servicio_id)->nombre,
+                'tipo_servicio_id' => $item->tipo_servicio_id,
+                'nombre_tipo_servicio' => Tipo_Servicio::find($item->tipo_servicio_id)->tipo,
+                'caracteristicas_tipo_servicio' => Tipo_Servicio::find($item->tipo_servicio_id)->caracteristicas,
+                'precio_tipo_Servicio' => Tipo_Servicio::find($item->tipo_servicio_id)->precio,
+            ];
+        });
+        $total = $this->calcularTotal($evento);
+
+        $personal = EventoUsuario::where('evento_id', $evento->id)->get()->map(function ($item) {
+            $user = User::find($item->user_id);
+            return [
+                'usuario_id' => $user->id,
+                'usuario_nombres' => $user->usuario_nombres,
+                'usuario_app' => $user->usuario_app,
+                'usuario_apm' => $user->usuario_apm,
+                'usuario_telefono' => $user->usuario_telefono,
+                'roles' => $user->getRoleNames()->first()
+            ];
+        })->groupBy('roles');
+
+
+        return view('eventos.detalle', compact('personal', 'total', 'tipo_servicios', 'evento', 'breadcrumb', 'cliente'));
+    }
+    private function calcularTotal(Evento $evento): float
+    {
+        $horaInicio = Carbon::parse($evento->hora_inicio);
+        $horaFin = Carbon::parse($evento->hora_fin);
+        $duracionHoras = $horaInicio->diffInHours($horaFin);
+
+        $tipo_servicios = ServicioEvento::where('evento_id', $evento->id)->get()->map(function ($item) {
+            return [
+                'servicio_id' => $item->servicio_id,
+                'nombre_servicio' => Servicio::find($item->servicio_id)->nombre,
+                'tipo_servicio_id' => $item->tipo_servicio_id,
+                'nombre_tipo_servicio' => Tipo_Servicio::find($item->tipo_servicio_id)->tipo,
+                'caracteristicas_tipo_servicio' => Tipo_Servicio::find($item->tipo_servicio_id)->caracteristicas,
+                'precio_tipo_Servicio' => Tipo_Servicio::find($item->tipo_servicio_id)->precio,
+            ];
+        });
+
+        $total = 0;
+        foreach ($tipo_servicios as $tipo) {
+            $precio = $tipo['precio_tipo_Servicio'] ?? 0;
+            $total += $precio * $duracionHoras;
+        }
+
+        return round($total, 1);
+    }
     // Mostrar el formulario para editar una solicitud
     public function edit(Evento $evento)
     {
@@ -136,5 +204,49 @@ class EventoController extends Controller
         $evento->delete();
 
         return redirect()->route('eventos.index')->with('success', 'Solicitud eliminada con éxito');
+    }
+    public function recibo(Evento $evento)
+    {
+
+        $cliente = Cliente::where('evento_id', $evento->id)->first();
+
+        $tipo_servicios = ServicioEvento::where('evento_id', $evento->id)->get()->map(function ($item) {
+            return [
+                'servicio_id' => $item->servicio_id,
+                'nombre_servicio' => Servicio::find($item->servicio_id)->nombre,
+                'tipo_servicio_id' => $item->tipo_servicio_id,
+                'nombre_tipo_servicio' => Tipo_Servicio::find($item->tipo_servicio_id)->tipo,
+                'caracteristicas_tipo_servicio' => Tipo_Servicio::find($item->tipo_servicio_id)->caracteristicas,
+                'precio_tipo_Servicio' => Tipo_Servicio::find($item->tipo_servicio_id)->precio,
+            ];
+        });
+        $total = $this->calcularTotal($evento);
+
+        $personal = EventoUsuario::where('evento_id', $evento->id)->get()->map(function ($item) {
+            $user = User::find($item->user_id);
+            return [
+                'usuario_id' => $user->id,
+                'usuario_nombres' => $user->usuario_nombres,
+                'usuario_app' => $user->usuario_app,
+                'usuario_apm' => $user->usuario_apm,
+                'usuario_telefono' => $user->usuario_telefono,
+                'roles' => $user->getRoleNames()->first()
+            ];
+        });
+
+        $pdf = PDF::loadView('eventos.recibo', compact('personal', 'total', 'tipo_servicios', 'evento', 'cliente'));
+
+        return $pdf->download('Recibo' . $evento->titulo . '.pdf');
+    }
+
+    public function email(Evento $evento, Cliente $cliente)
+    {
+        $cliente = Cliente::where('evento_id', $evento->id)->first();
+
+
+        Mail::to($cliente->email)->send(new notificarCliente($evento));
+
+        return redirect()->back()->with('success', 'Notificacion enviada al cliente con exito');
+
     }
 }

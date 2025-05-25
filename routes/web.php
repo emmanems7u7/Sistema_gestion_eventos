@@ -278,10 +278,17 @@ Route::middleware(['auth'])->group(function () {
 
 
 });
+Route::get('solicitud/cliente', [SolicitudController::class, 'crear_solicitud'])->name('solicitud.evento_cliente');
+Route::post('solicitudes/cliente', [SolicitudController::class, 'store_cliente'])->name('solicitudes.store_cliente');
+
+Route::post('/precio/solicitud', [SolicitudController::class, 'verifica_precios']);
+
+
 
 // Listar todas las eventos
 
 Route::get('eventos', [EventoController::class, 'index'])->name('eventos.index')->middleware('can:eventos.ver');
+
 
 Route::get('eventos/create', [EventoController::class, 'create'])->name('eventos.create')->middleware('can:eventos.crear');
 Route::post('eventos', [EventoController::class, 'store'])->name('eventos.store')->middleware('can:eventos.guardar');
@@ -290,6 +297,8 @@ Route::get('eventos/{evento}/edit', [EventoController::class, 'edit'])->name('ev
 Route::put('eventos/{evento}', [EventoController::class, 'update'])->name('eventos.update')->middleware('can:eventos.actualizar');
 Route::delete('eventos/{evento}', [EventoController::class, 'destroy'])->name('eventos.destroy')->middleware('can:eventos.eliminar');
 
+Route::get('eventos/{evento}/recibo', [EventoController::class, 'recibo'])->name('eventos.recibo');
+Route::get('eventos/{evento}/{cliente}/email', [EventoController::class, 'email'])->name('eventos.email')->middleware('can:eventos.email');
 
 
 

@@ -131,9 +131,9 @@
 
                                     <td class="text-center">
 
-                                        <button class="btn btn-sm btn-info">
+                                        <a href="{{ route('eventos.show', $evento) }}" class="btn btn-sm btn-info">
                                             <i class="fas fa-check-circle"></i> Detalle
-                                        </button>
+                                        </a>
 
                                         <a href="{{ route('eventos.edit', $evento) }}" class="btn btn-sm btn-primary me-1">
                                             <i class="fas fa-edit"></i> Editar

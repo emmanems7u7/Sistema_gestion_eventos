@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Notificación de Aprobación Automática</title>
+    <title>Notificación cliente </title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -60,17 +60,19 @@
 
 <body>
     <div class="email-container">
-        <h1>Aprobación Automática de Solicitud</h1>
-        <p>Estimado equipo,</p>
-        <p>Se realizado una aprobación automática para la siguiente solicitud.</p>
-        <p>Por favor, revise los detalles haciendo clic en el siguiente enlace:</p>
-        <a href="{{ route('solicitud.detalle', $solicitud) }}" class="button" target="_blank"
-            rel="noopener noreferrer">Ver Solicitud</a>
-        <p>Para cualquier consulta, por favor contacte con el área correspondiente.</p>
+        <h1>Aprobación de Solicitud</h1>
+        <p>Estimado Usuario,</p>
+        <p>Fue asignado a un evento para la fecha {{ $evento->fecha }}, debe presentarse a horas
+            {{ $evento->hora_inicio }}, el evento concluirá a horas {{ $evento->hora_fin }}
+        </p>
+        <p>Puede ver mas detalles del evento con el siguiente botón:</p>
+        <a href="{{ route('eventos.show', $evento) }}" class="button" target="_blank" rel="noopener noreferrer">Ver
+            evento</a>
+
         <p>Saludos,<br>Departamento de Administración</p>
     </div>
     <div class="footer">
-        <p>Este email fue enviado automáticamente por <strong>{{ env('APP_NAME') }}</strong>.</p>
+        <p>Este email fue enviado Automaticamente por <strong>{{ env('APP_NAME') }}</strong>.</p>
         <p>&copy; {{ date('Y') }} {{ env('APP_NAME') }}. Todos los derechos reservados.</p>
     </div>
 </body>

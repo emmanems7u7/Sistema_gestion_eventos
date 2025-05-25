@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Notificación de Aprobación Automática</title>
+    <title>Notificación de Aprobación Manual</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -60,17 +60,17 @@
 
 <body>
     <div class="email-container">
-        <h1>Aprobación Automática de Solicitud</h1>
+        <h1>Aprobación Manual de Solicitud</h1>
         <p>Estimado equipo,</p>
-        <p>Se realizado una aprobación automática para la siguiente solicitud.</p>
+        <p>Se ha registrado una solicitud de evento se requiere que complete la solicitud.</p>
         <p>Por favor, revise los detalles haciendo clic en el siguiente enlace:</p>
-        <a href="{{ route('solicitud.detalle', $solicitud) }}" class="button" target="_blank"
+        <a href="{{ route('solicitudes.show', $solicitud) }}" class="button" target="_blank"
             rel="noopener noreferrer">Ver Solicitud</a>
         <p>Para cualquier consulta, por favor contacte con el área correspondiente.</p>
         <p>Saludos,<br>Departamento de Administración</p>
     </div>
     <div class="footer">
-        <p>Este email fue enviado automáticamente por <strong>{{ env('APP_NAME') }}</strong>.</p>
+        <p>Este email fue enviado Automaticamente por <strong>{{ env('APP_NAME') }}</strong>.</p>
         <p>&copy; {{ date('Y') }} {{ env('APP_NAME') }}. Todos los derechos reservados.</p>
     </div>
 </body>

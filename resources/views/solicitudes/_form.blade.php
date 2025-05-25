@@ -417,7 +417,7 @@
                     <div class="card-body">
                         <h5 class="card-title">${plan.tipo}</h5>
                         <p class="card-text">${plan.caracteristicas}</p>
-                        <p class="card-text"><strong>Precio:</strong> $${plan.precio}</p>
+                        <p class="card-text"><strong>Precio:</strong> Bs.${plan.precio}</p>
                     </div>
                 `;
 
@@ -429,6 +429,8 @@
 
                         // Actualiza el array de servicios seleccionados
                         actualizarServicioSeleccionado();
+
+
                     });
 
                     container.appendChild(card);
@@ -437,7 +439,7 @@
             .catch(error => {
                 console.error("Error al obtener los planes:", error);
             });
-        console.log(serviciosSeleccionados);
+
     }
 
     // Función para eliminar los planes de un servicio cuando se deselecciona
