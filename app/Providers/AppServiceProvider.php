@@ -39,7 +39,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if (Schema::connection('mysql')->hasTable('sis_adm_2.conf_correos')) {
+
+        $dbName = env('DB_DATABASE');
+        $tableName = 'conf_correos';
+        if (Schema::connection('mysql')->hasTable($dbName . '.' . $tableName)) {
             $conf = ConfCorreo::first();
 
             if ($conf) {
