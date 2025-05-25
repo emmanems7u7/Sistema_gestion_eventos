@@ -112,7 +112,8 @@
                             <!-- Nombre -->
                             <p class="card-title">
                                 <span class="font-weight-bold">Categoria:</span>
-                                {{  App\Models\Catalogo::where('catalogo_codigo', $inventario->categoria)->first()->catalogo_descripcion }}
+                                {{ optional(App\Models\Catalogo::where('catalogo_codigo', $inventario->categoria)->first())->catalogo_descripcion }}
+
                             </p>
 
                             <!-- Descripción -->
