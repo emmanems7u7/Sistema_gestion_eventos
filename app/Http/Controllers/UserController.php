@@ -37,8 +37,8 @@ class UserController extends Controller
             ['name' => 'Inicio', 'url' => route('home')],
             ['name' => 'Usuarios', 'url' => route('users.index')],
         ];
-        $cargos = Cargo::all();
-        return view('usuarios.create', compact('breadcrumb', 'cargos'));
+
+        return view('usuarios.create', compact('breadcrumb', ));
     }
     public function Perfil()
     {

@@ -46,7 +46,7 @@ class MenuController extends Controller
     {
 
         $request->validate([
-            'nombre' => 'required|string|max:255',
+            'nombre' => 'required|string|max:255|unique:menus,nombre',
             'orden' => [
                 'required',
                 'integer',
@@ -55,7 +55,7 @@ class MenuController extends Controller
                 }),
             ],
             'seccion_id' => 'required|exists:secciones,id',
-            'ruta' => 'required|string|max:255|unique:menus,ruta',
+            'ruta' => 'required|string|max:255',
         ]);
 
         $this->menuRepository->CrearMenu($request);
