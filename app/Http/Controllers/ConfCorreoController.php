@@ -22,7 +22,7 @@ class ConfCorreoController extends Controller
 
     function index()
     {
-        $conf_correo = ConfCorreo::find(env('CONF_CORREO_ID'));
+        $conf_correo = ConfCorreo::first();
 
 
         $breadcrumb = [
@@ -34,7 +34,7 @@ class ConfCorreoController extends Controller
 
     function store(request $request)
     {
-        $correoId = env('CONF_CORREO_ID');
+        $correoId = 1;
 
         $validated = $request->validate([
             'conf_correo_protocol' => 'required|string|max:20|not_in:-1',
@@ -87,9 +87,8 @@ class ConfCorreoController extends Controller
 
     public function enviarPrueba()
     {
-        $correo = env('CONF_CORREO_ID');
 
-        $conf = ConfCorreo::find($correo);
+        $conf = ConfCorreo::first();
 
         if (!$conf) {
             return response()->json(['error' => 'Configuración no encontrada'], 404);
