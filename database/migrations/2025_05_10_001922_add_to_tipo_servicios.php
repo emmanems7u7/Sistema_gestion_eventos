@@ -12,8 +12,8 @@ return new class extends Migration {
     {
         Schema::table('tipo__servicios', function (Blueprint $table) {
 
-            //   $table->string('catalogo_id')->nullable(); // O el tipo correcto que coincida con catalogo_codigo
-            //$table->foreign('catalogo_id')->references('catalogo_codigo')->on('catalogos')->onDelete('cascade');
+            $table->string('catalogo_id')->nullable();
+            //  $table->foreign('catalogo_id')->references('catalogo_codigo')->on('catalogos')->onDelete('cascade');
 
         });
     }

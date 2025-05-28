@@ -98,12 +98,14 @@
                             <label for="role">Rol</label>
                             <select name="role" id="role" class="form-control" required>
                                 @foreach(\Spatie\Permission\Models\Role::all() as $role)
-                                    <option value="{{ $role->name }}" {{ $user->getRoleNames()->first() === $role->name ? 'selected' : '' }}>
+                                    <option value="{{ $role->name }}"
+                                        {{ old('role', $user->getRoleNames()->first()) === $role->name ? 'selected' : '' }}>
                                         {{ ucfirst($role->name) }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
+
 
 
                         <div class="col-12 text-center">

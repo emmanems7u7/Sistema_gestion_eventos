@@ -36,7 +36,7 @@ class CatalogoRepository extends BaseRepository implements CatalogoInterface
             'catalogo_parent' => $this->cleanHtml($request->catalogo_parent),
             'catalogo_codigo' => $this->cleanHtml($request->catalogo_codigo),
             'catalogo_descripcion' => $this->cleanHtml($request->catalogo_descripcion),
-            'catalogo_estado' => $this->cleanHtml($request->catalogo_estado),
+            'catalogo_estado' => $request->input('catalogo_estado', 0),
         ]);
     }
 

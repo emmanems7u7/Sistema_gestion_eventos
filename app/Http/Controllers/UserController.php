@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Interfaces\UserInterface;
-use App\Models\Cargo;
+
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -76,14 +76,14 @@ class UserController extends Controller
     public function edit($id)
     {
         $user = User::with('cargo')->find($id);
-        $cargos = Cargo::all();
+
         $breadcrumb = [
             ['name' => 'Inicio', 'url' => route('home')],
             ['name' => 'Usuarios', 'url' => route('users.index')],
             ['name' => 'Editar Usuario', 'url' => route('users.edit', $id)],
         ];
 
-        return view('usuarios.edit', compact('user', 'breadcrumb', 'cargos'));
+        return view('usuarios.edit', compact('user', 'breadcrumb'));
     }
 
     // Actualizar un usuario

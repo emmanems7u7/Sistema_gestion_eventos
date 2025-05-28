@@ -60,6 +60,7 @@ class ServicioController extends Controller
         $breadcrumb = [
             ['name' => 'Inicio', 'url' => route('home')],
             ['name' => 'Servicios', 'url' => route('servicios.index')],
+            ['name' => 'Editar Servicio', 'url' => route('servicios.index')],
         ];
         $inventarios = Inventario::all();
         return view('servicios.edit', compact('inventarios', 'servicio', 'breadcrumb'));
@@ -149,6 +150,8 @@ class ServicioController extends Controller
         $breadcrumb = [
             ['name' => 'Inicio', 'url' => route('home')],
             ['name' => 'Servicios', 'url' => route('servicios.index')],
+
+            ['name' => 'Editar tipo Servicio', 'url' => route('servicios.index')],
         ];
 
         $categorias = Categoria::all();
