@@ -4,9 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Menu;
+use App\Models\Evento;
+use App\Models\Solicitud;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 
 class HomeController extends Controller
@@ -45,8 +49,34 @@ class HomeController extends Controller
         } else {
             $tiempo_cambio_contraseña = 0;
         }
+        $total_eventos = Evento::all()->count();
+        $total_sol_eventos = Solicitud::all()->count();
+        $usuarios = User::all()->count();
 
-        return view('home', compact('breadcrumb', 'tiempo_cambio_contraseña'));
+        $eventosPorFecha = Evento::select('fecha', DB::raw('COUNT(*) as total'))
+            ->groupBy('fecha')
+            ->orderBy('fecha', 'asc')
+            ->get();
+
+        // Separar datos para pasarlos al gráfico
+        $fechas = $eventosPorFecha->pluck('fecha')->map(function ($fecha) {
+            return \Carbon\Carbon::parse($fecha)->format('d/m/Y');
+        });
+
+        $totales = $eventosPorFecha->pluck('total');
+
+
+
+
+        $solicitudesPorFecha = Solicitud::select('fecha', DB::raw('COUNT(*) as total'))
+            ->groupBy('fecha')
+            ->orderBy('fecha', 'asc')
+            ->get();
+
+        $fechasSolicitudes = $solicitudesPorFecha->pluck('fecha')->map(fn($f) => \Carbon\Carbon::parse($f)->format('d/m/Y'));
+        $totalesSolicitudes = $solicitudesPorFecha->pluck('total');
+
+        return view('home', compact('fechasSolicitudes', 'totalesSolicitudes', 'totales', 'fechas', 'usuarios', 'total_sol_eventos', 'total_eventos', 'breadcrumb', 'tiempo_cambio_contraseña'));
     }
 
 
