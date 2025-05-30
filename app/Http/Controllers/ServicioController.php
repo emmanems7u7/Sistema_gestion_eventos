@@ -43,7 +43,10 @@ class ServicioController extends Controller
         ]);
 
         if ($request->hasFile('imagen')) {
-            $data['imagen'] = $request->file('imagen')->store('servicios', 'public');
+            $file = $request->file('imagen');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('storage/servicios'), $filename);
+            $data['imagen'] = 'servicios/' . $filename;
         }
 
         Servicio::create($data);
@@ -82,7 +85,10 @@ class ServicioController extends Controller
             if ($servicio->imagen) {
                 Storage::disk('public')->delete($servicio->imagen);
             }
-            $data['imagen'] = $request->file('imagen')->store('servicios', 'public');
+            $file = $request->file('imagen');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('storage/servicios'), $filename);
+            $data['imagen'] = 'servicios/' . $filename;
         }
 
         $servicio->update($data);
@@ -128,8 +134,8 @@ class ServicioController extends Controller
             'catalogo_id' => 'required|string',
             'cantidad_personal' => 'nullable|integer|min:0',
             'cantidad_equipo' => 'nullable|integer|min:0',
+            'inventario_id' => 'required|exists:inventarios,id',
         ]);
-
 
 
         Tipo_Servicio::create([
@@ -141,6 +147,7 @@ class ServicioController extends Controller
             'cantidad_personal' => $request->input('cantidad_personal'),
             'cantidad_equipo' => $request->input('cantidad_personal'),
             'categoria_id' => $request->input('categoria_id'),
+            'inventario_id' => $request->input('inventario_id'),
         ]);
         return redirect()->route('servicios.index')->with('success', 'Tipo de servicio creado correctamente.');
     }
@@ -158,6 +165,11 @@ class ServicioController extends Controller
         $tipoServicio = Tipo_Servicio::with('categoria')->findOrFail($id);
         $servicio = Servicio::find($tipoServicio->servicio_id);
         $inventarios = Inventario::paginate(10);
+
+        if (request()->ajax()) {
+            return view('tipo_servicios._inventarios', compact('inventarios'))->render();
+        }
+
         return view('tipo_servicios.edit', compact('inventarios', 'tipoServicio', 'servicio', 'breadcrumb', 'categorias'));
     }
 
