@@ -94,126 +94,129 @@
     <div class="container mt-3">
 
         <div class="row">
-            @foreach ($inventarios as $inventario)
-                <div class="col-md-12 mb-4" id="inventario_{{ $inventario->id }}">
-                    <div class="card shadow-sm rounded-lg position-relative">
-                        <div class="card-body">
-                            <!-- Fecha de adquisición en la parte superior derecha -->
-                            <p class="card-text text-muted position-absolute"
-                                style="top: 10px; right: 10px; font-size: 0.85rem;">
-                                <span class="font-weight-bold">Fecha de adquisición:</span>
-                                {{ $inventario->fecha_adquisicion }}
-                            </p>
 
-                            <!-- Nombre -->
-                            <h5 class="card-title">
-                                <span class="font-weight-bold">Nombre:</span> {{ $inventario->nombre }}
-                            </h5>
-                            <!-- Nombre -->
-                            <p class="card-title">
-                                <span class="font-weight-bold">Categoria:</span>
-                                {{ optional(App\Models\Catalogo::where('catalogo_codigo', $inventario->categoria)->first())->catalogo_descripcion }}
+            <div class="table-responsive">
 
-                            </p>
 
-                            <!-- Descripción -->
-                            <p class="card-text">
-                                <span class="font-weight-bold">Descripción:</span>
-                                {{ Str::limit($inventario->descripcion, 100) }}
-                            </p>
+                @foreach ($inventarios as $inventario)
+                    <div class="col-md-12 mb-4" id="inventario_{{ $inventario->id }}">
+                        <div class="card shadow-sm rounded-lg position-relative">
+                            <div class="card-body">
+                                <!-- Fecha de adquisición en la parte superior derecha -->
+                                <p class="card-text text-muted position-absolute"
+                                    style="top: 10px; right: 10px; font-size: 0.85rem;">
+                                    <span class="font-weight-bold">Fecha de adquisición:</span>
+                                    {{ $inventario->fecha_adquisicion }}
+                                </p>
 
-                            <!-- Cantidad Disponible con colores -->
-                            @php
-                                $cantidadMaxima = 100; // Establece el valor máximo según tus necesidades
-                                $cantidadDisponible = $inventario->cantidad_disponible;
-                                $color = '';
-                                $alerta = '';
+                                <!-- Nombre -->
+                                <h5 class="card-title">
+                                    <span class="font-weight-bold">Nombre:</span> {{ $inventario->nombre }}
+                                </h5>
+                                <!-- Nombre -->
+                                <p class="card-title">
+                                    <span class="font-weight-bold">Categoria:</span>
+                                    {{ optional(App\Models\Catalogo::where('catalogo_codigo', $inventario->categoria)->first())->catalogo_descripcion }}
 
-                                if ($cantidadDisponible > $cantidadMaxima / 2) {
-                                    $color = 'text-success'; // Verde
-                                    $alerta = 'Stock suficiente';
-                                } elseif ($cantidadDisponible == $cantidadMaxima / 2) {
-                                    $color = 'text-warning'; // Amarillo
-                                    $alerta = 'Stock medio';
-                                } else {
-                                    $color = 'text-danger'; // Rojo
-                                    $alerta = '¡Alerta! Bajo stock';
-                                }
-                            @endphp
+                                </p>
 
-                            <p class="card-text">
-                                <span class="font-weight-bold">Cantidad Disponible:</span>
-                                <span class="{{ $color }}">{{ $cantidadDisponible }}</span>
-                            </p>
+                                <!-- Descripción -->
+                                <p class="card-text">
+                                    <span class="font-weight-bold">Descripción:</span>
+                                    {{ Str::limit($inventario->descripcion, 100) }}
+                                </p>
 
-                            <!-- Frecuencia de Mantenimiento -->
-                            <p class="card-text">
-                                <span class="font-weight-bold">Frecuencia de Mantenimiento:</span>
-                                {{ $inventario->frecuencia_mantenimiento }}
-                            </p>
+                                <!-- Cantidad Disponible con colores -->
+                                @php
+                                    $cantidadMaxima = 100; // Establece el valor máximo según tus necesidades
+                                    $cantidadDisponible = $inventario->cantidad_disponible;
+                                    $color = '';
+                                    $alerta = '';
 
-                            <!-- Estado -->
-                            <p class="card-text">
-                                <span class="font-weight-bold">Estado:</span>
-                                {{ $inventario->estado ? 'Activo' : 'Inactivo' }}
-                            </p>
+                                    if ($cantidadDisponible > $cantidadMaxima / 2) {
+                                        $color = 'text-success'; // Verde
+                                        $alerta = 'Stock suficiente';
+                                    } elseif ($cantidadDisponible == $cantidadMaxima / 2) {
+                                        $color = 'text-warning'; // Amarillo
+                                        $alerta = 'Stock medio';
+                                    } else {
+                                        $color = 'text-danger'; // Rojo
+                                        $alerta = '¡Alerta! Bajo stock';
+                                    }
+                                @endphp
 
-                            <div class="card mt-3">
-                                <div class="card-body">
-                                    <h6 class="font-weight-bold">Imágenes:</h6>
-                                    <!-- Botón para abrir el modal -->
-                                    @can('inventarios.agregar_imagen')
-                                        <button class="btn btn-primary" onclick="ModalImagenes(' {{ $inventario->id }}')">
-                                            <i class="fas fa-plus"></i> Agregar Imagen
+                                <p class="card-text">
+                                    <span class="font-weight-bold">Cantidad Disponible:</span>
+                                    <span class="{{ $color }}">{{ $cantidadDisponible }}</span>
+                                </p>
+
+                                <!-- Frecuencia de Mantenimiento -->
+                                <p class="card-text">
+                                    <span class="font-weight-bold">Frecuencia de Mantenimiento:</span>
+                                    {{ $inventario->frecuencia_mantenimiento }}
+                                </p>
+
+                                <!-- Estado -->
+                                <p class="card-text">
+                                    <span class="font-weight-bold">Estado:</span>
+                                    {{ $inventario->estado ? 'Activo' : 'Inactivo' }}
+                                </p>
+
+                                <div class="card mt-3">
+                                    <div class="card-body">
+                                        <h6 class="font-weight-bold">Imágenes:</h6>
+                                        <!-- Botón para abrir el modal -->
+                                        @can('inventarios.agregar_imagen')
+                                            <button class="btn btn-primary" onclick="ModalImagenes(' {{ $inventario->id }}')">
+                                                <i class="fas fa-plus"></i> Agregar Imagen
+                                            </button>
+                                        @endcan
+                                        @if ($inventario->imagenes->isEmpty())
+                                            <p class="text-muted">No tiene imágenes.</p>
+                                        @else
+                                            <div class="row mt-3">
+                                                @foreach ($inventario->imagenes as $imagen)
+                                                    <div class="col-md-2 mb-3 position-relative" id="imagen-{{ $imagen->id }}">
+                                                        <img src="{{ Storage::url($imagen->ruta) }}"
+                                                            alt="Imagen de {{ $inventario->nombre }}" class="img-fluid rounded">
+                                                        <!-- Botón de eliminar imagen -->
+                                                        <button style="    right: 5px;"
+                                                            class="btn btn-danger btn-sm position-absolute top-0 right-0 m-2"
+                                                            onclick="confirmDelete('{{ $imagen->id }}')">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                                <!-- Botones de acción -->
+                                <div class="d-flex justify-content-end mt-3">
+                                    @can('inventarios.editar')
+                                        <button onclick="Editar('{{ $inventario->id }}')" class="btn btn-warning btn-sm mr-2">
+                                            <i class="fas fa-edit"></i> Editar
                                         </button>
                                     @endcan
-                                    @if ($inventario->imagenes->isEmpty())
-                                        <p class="text-muted">No tiene imágenes.</p>
-                                    @else
-                                        <div class="row mt-3">
-                                            @foreach ($inventario->imagenes as $imagen)
-                                                <div class="col-md-2 mb-3 position-relative" id="imagen-{{ $imagen->id }}">
-                                                    <img src="{{ Storage::url($imagen->ruta) }}"
-                                                        alt="Imagen de {{ $inventario->nombre }}" class="img-fluid rounded">
-                                                    <!-- Botón de eliminar imagen -->
-                                                    <button style="    right: 5px;"
-                                                        class="btn btn-danger btn-sm position-absolute top-0 right-0 m-2"
-                                                        onclick="confirmDelete('{{ $imagen->id }}')">
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                            <!-- Botones de acción -->
-                            <div class="d-flex justify-content-end mt-3">
-                                @can('inventarios.editar')
-                                    <button onclick="Editar('{{ $inventario->id }}')" class="btn btn-warning btn-sm mr-2">
-                                        <i class="fas fa-edit"></i> Editar
-                                    </button>
-                                @endcan
-                                @can('inventarios.eliminar')
-                                    <button onclick="EliminarInventario('{{ $inventario->id }}')"
-                                        class="btn btn-danger btn-sm mr-2">
-                                        <i class="fas fa-edit"></i> Eliminar
-                                    </button>
-                                @endcan
+                                    @can('inventarios.eliminar')
+                                        <button onclick="EliminarInventario('{{ $inventario->id }}')"
+                                            class="btn btn-danger btn-sm mr-2">
+                                            <i class="fas fa-edit"></i> Eliminar
+                                        </button>
+                                    @endcan
 
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            @endforeach
+                @endforeach
 
-
+            </div>
+            <div class="d-flex justify-content-center">
+                {{ $inventarios->links('pagination::bootstrap-4') }}
+            </div>
         </div>
 
-        <!-- Paginación -->
-        <div class="d-flex justify-content-center">
-            {{ $inventarios->links() }}
-        </div>
 
     </div>
 

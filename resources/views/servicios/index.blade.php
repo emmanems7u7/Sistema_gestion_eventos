@@ -78,7 +78,7 @@
 
                     </div>
 
-                    <div class="card-footer d-flex justify-content-between align-items-center">
+                    <div class="card-footer">
                         <form action="{{ route('servicios.destroy', $servicio) }}" method="POST"
                             id="delete-form-{{ $servicio->id }}">
                             @csrf

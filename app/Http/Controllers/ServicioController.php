@@ -125,13 +125,13 @@ class ServicioController extends Controller
 
     public function store_tipo_servicio(Request $request)
     {
+
         $request->validate([
             'servicio_id' => 'required|exists:servicios,id',
             'tipo' => 'required|string',
             'caracteristicas' => 'nullable|string',
             'precio' => 'nullable|numeric',
             'categoria_id' => 'required|exists:categorias,id',
-            'catalogo_id' => 'required|string',
             'cantidad_personal' => 'nullable|integer|min:0',
             'cantidad_equipo' => 'nullable|integer|min:0',
             'inventario_id' => 'required|exists:inventarios,id',
@@ -143,7 +143,6 @@ class ServicioController extends Controller
             'tipo' => $request->input('tipo'),
             'caracteristicas' => $request->input('caracteristicas'),
             'precio' => $request->input('precio'),
-            'catalogo_id' => $request->input('catalogo_id'),
             'cantidad_personal' => $request->input('cantidad_personal'),
             'cantidad_equipo' => $request->input('cantidad_personal'),
             'categoria_id' => $request->input('categoria_id'),

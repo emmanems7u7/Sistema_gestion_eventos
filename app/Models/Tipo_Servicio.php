@@ -12,7 +12,6 @@ class Tipo_Servicio extends Model
         'tipo',
         'caracteristicas',
         'precio',
-        'catalogo_id',
         'cantidad_personal',
         'cantidad_equipo',
         'categoria_id',

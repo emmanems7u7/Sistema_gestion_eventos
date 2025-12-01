@@ -87,7 +87,7 @@
 
         <div class="card card-frame card-profile-bottom">
             <div class="card-body">
-                <div class="responsive">
+                <div class="table-responsive">
 
                     <table class="table table-bordered table-striped mt-4">
                         <thead class="table-dark">
