@@ -46,7 +46,7 @@
                                             <div class="row gy-2">
                                                 <div class="col-4"><strong>Tipo:</strong> {{ $tipo->tipo }}</div>
                                                 <div class="col-8 text-end"><strong>Categoría:</strong>
-                                                    {{ App\Models\Catalogo::where('catalogo_codigo', $tipo->catalogo_id)->first()->catalogo_descripcion ?? 'No tiene categoria' }}
+                                                    {{$tipo->categoria->descripcion  }}
                                                 </div>
                                                 <div class="col-12"><strong>Características:</strong> {{ $tipo->caracteristicas }}
                                                 </div>

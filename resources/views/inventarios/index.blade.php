@@ -2,20 +2,6 @@
 
 @section('content')
     <style>
-        /* Reducir el tamaño de los enlaces de la paginación */
-        .pagination .page-link {
-            font-size: 0.15rem !important;
-            /* Reducir el tamaño de la fuente */
-            padding: 0.25rem 0.5rem !important;
-            /* Reducir el padding */
-        }
-
-        /* Reducir el tamaño de los iconos de las flechas */
-        .pagination .page-link i {
-            font-size: 0.8rem !important;
-            /* Reducir aún más el tamaño de los iconos */
-        }
-
         .card-body .text-primary {
             font-size: 1rem;
             font-weight: bold;
@@ -174,15 +160,17 @@
                                         @if ($inventario->imagenes->isEmpty())
                                             <p class="text-muted">No tiene imágenes.</p>
                                         @else
+                                
                                             <div class="row mt-3">
                                                 @foreach ($inventario->imagenes as $imagen)
                                                     <div class="col-md-2 mb-3 position-relative" id="imagen-{{ $imagen->id }}">
-                                                        <img src="{{ Storage::url($imagen->ruta) }}"
+                                                        <img src="{{ asset($imagen->ruta) }}"
+                                
                                                             alt="Imagen de {{ $inventario->nombre }}" class="img-fluid rounded">
                                                         <!-- Botón de eliminar imagen -->
                                                         <button style="    right: 5px;"
                                                             class="btn btn-danger btn-sm position-absolute top-0 right-0 m-2"
-                                                            onclick="confirmDelete('{{ $imagen->id }}')">
+                                                            onclick="ConfirmDeleteImage('{{ $imagen->id }}')">
                                                             <i class="fas fa-times"></i>
                                                         </button>
                                                     </div>
@@ -191,21 +179,24 @@
                                         @endif
                                     </div>
                                 </div>
-                                <!-- Botones de acción -->
-                                <div class="d-flex justify-content-end mt-3">
-                                    @can('inventarios.editar')
-                                        <button onclick="Editar('{{ $inventario->id }}')" class="btn btn-warning btn-sm mr-2">
-                                            <i class="fas fa-edit"></i> Editar
-                                        </button>
-                                    @endcan
-                                    @can('inventarios.eliminar')
-                                        <button onclick="EliminarInventario('{{ $inventario->id }}')"
-                                            class="btn btn-danger btn-sm mr-2">
-                                            <i class="fas fa-edit"></i> Eliminar
-                                        </button>
-                                    @endcan
 
-                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <!-- Botones de acción -->
+
+                                @can('inventarios.editar')
+                                    <button onclick="Editar('{{ $inventario->id }}')" class="btn btn-warning btn-sm mr-2">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </button>
+                                @endcan
+                                @can('inventarios.eliminar')
+                                    <button onclick="EliminarInventario('{{ $inventario->id }}')"
+                                        class="btn btn-danger btn-sm mr-2">
+                                        <i class="fas fa-edit"></i> Eliminar
+                                    </button>
+                                @endcan
+
+
                             </div>
                         </div>
                     </div>
@@ -437,54 +428,51 @@
             $('#addImageModal').modal('show');
 
         }
-        function confirmDelete(id) {
-            Swal.fire({
-                title: '¿Estás seguro?',
-                text: "¡Esta acción no se puede deshacer!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'Cancelar',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Realizar la solicitud de eliminación
+
+        function ConfirmDeleteImage(id) {
+
+            alertify.confirm(
+                'Confirmación',
+                '¿Estás seguro? ¡Esta acción no se puede deshacer!',
+                function () {
+                    // Confirmado → eliminar
+
                     fetch(`/inventarios/imagen/${id}`, {
                         method: 'DELETE',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'  // Asegúrate de incluir el token CSRF en tu plantilla Blade
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
                         },
-                        body: JSON.stringify({
-                            id: id // El ID de la imagen a eliminar
-                        })
+                        body: JSON.stringify({ id: id })
                     })
-                        .then(response => response.json())  // Esperamos la respuesta en formato JSON
+                        .then(response => response.json())
                         .then(data => {
+
                             if (data.success) {
-                                // Si la eliminación fue exitosa, mostramos un mensaje
-                                Swal.fire(
-                                    '¡Eliminado!',
-                                    'La imagen ha sido eliminada correctamente.',
-                                    'success'
-                                );
 
+                                alertify.success('La imagen ha sido eliminada correctamente.');
 
-                                document.getElementById(`imagen-${id}`).remove();
+                                // Eliminar el elemento del DOM
+                                const imgElement = document.getElementById(`imagen-${id}`);
+                                if (imgElement) imgElement.remove();
+
                             } else {
-                                // Si hubo un error, mostramos un mensaje de error
-                                Swal.fire(
-                                    'Error!',
-                                    'Hubo un problema al eliminar la imagen.',
-                                    'error'
-                                );
+                                alertify.error('Hubo un problema al eliminar la imagen.');
                             }
+
                         })
+                        .catch(() => {
+                            alertify.error('Error al conectar con el servidor.');
+                        });
+                },
 
-
+                function () {
+                    // Cancelado
+                    alertify.warning('Cancelado');
                 }
-            });
-        }
+            ).set('labels', { ok: 'Sí, eliminar', cancel: 'Cancelar' })
+            .set('reverseButtons', true);
+            }
 
 
         function EliminarInventario(id) {

@@ -120,7 +120,7 @@
                                     <a type="button" class="text-secondary font-weight-bold text-xs" id="modal_edit_usuario_button"
                                         onclick="confirmarEliminar('{{ $usuario->id }}')">Eliminar Usuario</a>
 
-                                    <form id="eliminarUsuarioForm" method="POST"
+                                    <form id="eliminarUsuarioForm_{{ $usuario->id }}" method="POST"
                                         action="{{ route('users.destroy', ['user' => $usuario->id]) }}" style="display: none;">
                                         @csrf
                                         @method('DELETE')
@@ -189,7 +189,7 @@
             alertify.confirm('Confirmar eliminación', '¿Estás seguro de que deseas eliminar este usuario?',
                 function () {
 
-                    document.getElementById('eliminarUsuarioForm').submit();
+                    document.getElementById('eliminarUsuarioForm_'+userId).submit();
                 },
                 function () {
 

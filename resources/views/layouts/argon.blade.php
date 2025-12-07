@@ -126,7 +126,7 @@
                         <span class="ps-3 ms-3 nav-link-text ms-1">Perfil</span>
                     </a>
                 </li>
-                @role('admin')
+                @role('Sadmin')
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('menus.index') }}">
 
@@ -228,30 +228,28 @@
         </nav>
         <!-- End Navbar -->
         <div class="container">
-        <div class="main-content position-relative max-height-vh-100 h-100">
         @if (session('success'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-    </div>
-@endif
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+            @endif
 
-@if (session('error'))
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        {{ session('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-    </div>
-@endif
+            @if (session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+            @endif
 
-@if (session('warning'))
-    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-        {{ session('warning') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-    </div>
-@endif
+            @if (session('warning'))
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    {{ session('warning') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+            @endif
 
         @yield('content')
-          </div>
            
         </div>
 

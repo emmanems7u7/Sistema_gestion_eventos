@@ -8,7 +8,8 @@ use App\Models\Inventario;
 use App\Models\Imagen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\File;
 class InventarioController extends Controller
 {
     /**
@@ -72,10 +73,26 @@ class InventarioController extends Controller
         // Guardar las imágenes si existen
         if ($request->has('imagenes')) {
             foreach ($request->file('imagenes') as $image) {
-                $path = $image->store('imagenes', 'public');
+                // Generar nombre único
+                $fileName = Str::uuid() . '.' . $image->getClientOriginalExtension();
+
+                // Carpeta final dentro de public/
+                $destinationPath = public_path('uploads/imagenes/inventarios');
+
+                // Crear carpeta si no existe
+                if (!File::exists($destinationPath)) {
+                    File::makeDirectory($destinationPath, 0775, true);
+                }
+
+                // Mover el archivo a public/uploads/imagenes/inventarios
+                $image->move($destinationPath, $fileName);
+
+                // Ruta que se guardará en la BD (visible desde el navegador)
+                $ruta = 'uploads/imagenes/inventarios/' . $fileName;
+
                 Imagen::create([
                     'inventario_id' => $registro->id,
-                    'ruta' => $path,
+                    'ruta' => $ruta,
                     'tipo' => 'inventario'
 
                 ]);
@@ -103,17 +120,31 @@ class InventarioController extends Controller
         if ($request->hasFile('images')) {
             // Obtener el inventario al que se le van a asociar las imágenes
             $inventario = Inventario::findOrFail($request->inventario_id);
-
             // Iterar sobre las imágenes cargadas
             foreach ($request->file('images') as $image) {
-                // Guardar cada imagen en el almacenamiento público
-                $imagePath = $image->store('inventarios', 'public');
 
-                // Crear un nuevo registro en la base de datos para cada imagen
+                // Generar nombre único
+                $fileName = Str::uuid() . '.' . $image->getClientOriginalExtension();
+
+                // Carpeta final dentro de public/
+                $destinationPath = public_path('uploads/imagenes/inventarios');
+
+                // Crear carpeta si no existe
+                if (!File::exists($destinationPath)) {
+                    File::makeDirectory($destinationPath, 0775, true);
+                }
+
+                // Mover el archivo a public/uploads/imagenes/inventarios
+                $image->move($destinationPath, $fileName);
+
+                // Ruta que se guardará en la BD (visible desde el navegador)
+                $ruta = 'uploads/imagenes/inventarios/' . $fileName;
+
+                // Guardar en la BD
                 $inventario->imagenes()->create([
                     'inventario_id' => $inventario->id,
-                    'ruta' => $imagePath,
-                    'tipo' => 'principal', // O puedes asignar un tipo diferente para cada imagen
+                    'ruta' => $ruta,
+                    'tipo' => 'principal',
                 ]);
             }
 
