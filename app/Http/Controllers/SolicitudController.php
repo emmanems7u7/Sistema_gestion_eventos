@@ -245,7 +245,7 @@ class SolicitudController extends Controller
 
             $seguimiento = SeguimientoSolicitud::create([
                 'solicitud_id' => $solicitud->id,
-                'mensaje' => "La solicitud fue aprobada automaticamente en fecha" . $fechaActual . " a horas " . $horaActual . " se informó al cliente mediante correo",
+                'mensaje' => "La solicitud fue aprobada automaticamente en fecha " . $fechaActual . " a horas " . $horaActual . " se informó al cliente mediante correo",
             ]);
 
             foreach ($admins as $admin) {
@@ -509,6 +509,7 @@ class SolicitudController extends Controller
                 ]);
 
                 $cliente = Cliente::where('solicitud_id', $solicitud->id)->first();
+
                 Mail::to($cliente->email)->send(new notificarCliente($evento));
 
                 foreach ($admins as $admin) {
@@ -522,7 +523,7 @@ class SolicitudController extends Controller
 
         }
 
-        return redirect()->back()->with('success', 'La solicitud fue aprobada con exito');
+        return redirect()->route('eventos.index')->with('success', 'La solicitud fue aprobada con exito');
 
     }
 

@@ -63,7 +63,7 @@
         <h1>Aprobación de Solicitud</h1>
         <p>Estimado cliente,</p>
         <p>Su Solicitud fue aprobada con éxito</p>
-        <p>Puede descargar el recibo de de pago desde el siguiente enlace:</p>
+        <p>Puede descargar el recibo de pago desde el siguiente enlace:</p>
         <a href="{{ route('eventos.recibo', $evento) }}" class="button" target="_blank"
             rel="noopener noreferrer">Generar
             Recibo</a>
