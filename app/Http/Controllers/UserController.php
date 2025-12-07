@@ -98,15 +98,17 @@ class UserController extends Controller
 
         if ($user->roles->isNotEmpty()) {
             $user->syncRoles([]); // Elimina todos los roles
+
+            // Asignar el nuevo rol
+            $user->assignRole($request->input('role'));
         }
 
-        // Asignar el nuevo rol
-        $user->assignRole($request->input('role'));
+
         if ($perfil == 1) {
-            return redirect()->back()->with('success', 'Usuario actualizado exitosamente!');
+            return redirect()->back()->with('status', 'Usuario actualizado exitosamente!');
 
         } else {
-            return redirect()->route('users.index')->with('success', 'Usuario actualizado exitosamente!');
+            return redirect()->route('users.index')->with('status', 'Usuario actualizado exitosamente!');
 
         }
 
