@@ -96,14 +96,14 @@ class UserController extends Controller
 
         $user = $this->userRepository->EditarUsuario($request, $id, $perfil);
 
-        if ($user->roles->isNotEmpty()) {
-            $user->syncRoles([]); // Elimina todos los roles
-
-            // Asignar el nuevo rol
-            $user->assignRole($request->input('role'));
+        if ($perfil != 1) {
+            if ($user->roles->isNotEmpty()) {
+                $user->syncRoles([]);
+            }
         }
 
-
+        // Asignar el nuevo rol
+        $user->assignRole($request->input('role'));
         if ($perfil == 1) {
             return redirect()->back()->with('status', 'Usuario actualizado exitosamente!');
 
