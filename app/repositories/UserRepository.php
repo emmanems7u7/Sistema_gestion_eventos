@@ -40,7 +40,8 @@ class UserRepository extends BaseRepository implements UserInterface
     public function EditarUsuario($request, $id, $perfil)
     {
 
-        $this->validar_datos($request, $id);
+        $this->validar_datos($request, $id, $perfil);
+
         $user = User::findOrFail($id);
         if ($perfil == 1) {
 
@@ -138,7 +139,7 @@ class UserRepository extends BaseRepository implements UserInterface
 
     }
 
-    function validar_datos($request, $user_id = null)
+    function validar_datos($request, $user_id = null, $perfil = 0)
     {
         $email_validacion = 'required|email|not_regex:/<\s*script/i';
 
@@ -156,8 +157,12 @@ class UserRepository extends BaseRepository implements UserInterface
             'usuario_apm' => 'required|string|max:50|not_regex:/<\s*script/i',
             'usuario_telefono' => 'required|regex:/^[1-9][0-9]*$/',
             'usuario_direccion' => 'required|string|max:1000|not_regex:/<\s*script/i',
-            'role' => 'required|exists:roles,name',
         ]);
+        if ($perfil == 0) {
+            $validated = $request->validate([
+                'role' => 'required|exists:roles,name',
+            ]);
+        }
 
     }
 
