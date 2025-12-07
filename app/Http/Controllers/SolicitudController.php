@@ -329,6 +329,7 @@ class SolicitudController extends Controller
                 $servicio = Servicio::find($plan->servicio_id);
                 $tipo_servicio = Tipo_Servicio::find($plan->tipo_servicio_id);
                 $role = Role::find($servicio->role_id);
+
                 $personal = $role ? User::role($role->name)->get() : collect();
 
                 // Validar personal
